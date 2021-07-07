@@ -4,11 +4,9 @@ const app = express();
 // Use static server
 app.use(express.static('public'));
 
-const { generateID, createTodo } = require('./helpers');
+const { createTodo } = require('./helpers');
 const { todos } = require('./dummyTodos');
 let todosList = [...todos];
-
-
 
 // Get all todos
 app.get('/todos', (req, res) => {
@@ -46,16 +44,35 @@ app.put('/todos/:id', (req, res) => {
     const todoIndex = todosList.findIndex((element) => {
         return todoId === element.id;
     });
-    //get update from req.query
-    const update = req.query;
-    //set update to array at that index
-    todoList[todoIndex] = update;
-    res.status(200).send(update);
+    //Check if index is found || -1
+    if (todoIndex !== -1) {
+        //get update from req.query
+        const update = {...req.query, id: req.params.id};
+        //set update to array at that index
+        todosList[todoIndex] = update;
+        console.log(todosList[todoIndex]);
+        res.status(200).send(todosList[todoIndex]);
+    } else {
+        res.status(404).send('No todo found with that ID.');
+    }
 });
 
 // Delete a todo
-
-
+app.delete('/todos/:id', (req, res) => {
+    const todoId = req.params.id;
+    //get index
+    const todoIndex = todosList.findIndex((element) => {
+        return todoId === element.id;
+    });
+    //Check if index is found || -1
+    if (todoIndex !== -1) {
+        todoToBeDeleted = todosList[todoIndex];
+        todosList.splice(todoIndex, 1);
+        res.status(200).send(todoToBeDeleted);
+    } else {
+        res.status(404).send('No todo found with that ID.');
+    }
+});
 
 app.listen(3000, () => {
     console.log('App started on port 3000');
