@@ -68,7 +68,13 @@ const populateWThreeTodos = () => {
 // Get all todos
 todoRouter.get("/", (req, res) => {
   // Get all todos from the db and send them to the client
-  Todo.find({}).then((todos) => res.send(todos));
+  Todo.find({})
+    .then(function (todos) {
+      return res.send(todos);
+    })
+    .catch(function (err) {
+      return res.send(err);
+    });
 });
 
 // Get todo by id
@@ -144,5 +150,6 @@ todoRouter.delete("/:id", (req, res) => {
 });
 
 // populateWThreeTodos();
+deleteAllTodos();
 
 module.exports = todoRouter;
