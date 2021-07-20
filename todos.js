@@ -69,10 +69,10 @@ const populateWThreeTodos = () => {
 todoRouter.get("/", (req, res) => {
   // Get all todos from the db and send them to the client
   Todo.find({})
-    .then(function (todos) {
+    .then((todos) => {
       return res.send(todos);
     })
-    .catch(function (err) {
+    .catch((err) => {
       return res.send(err);
     });
 });
@@ -84,25 +84,40 @@ todoRouter.get("/:id", (req, res) => {
   
   Todo.findById(todoId)
     .then((todoItem) => {
-      res.status(200).send(todoItem);
+        res.send(todoItem);
     })
     .catch((err) => {
-      res.sendStatus(404).send(err);
+        res.send(err);
     });
 });
 
 // Create a todo
 todoRouter.post("/", (req, res) => {
-  // If query invalid, use empty string instead
-  const todoDescription = req.query.todo;
-  const dueDate = req.query.dueDate;
-  const completed = req.query.completed;
+  const { todoDescription, dueDate, completed } = req.query;
 
-  const newTodo = createTodo(todoDescription, dueDate, completed);
-  todosList.push(newTodo);
-  console.log(newTodo);
-  res.status(200).send(newTodo);
+  const newTodo = new Todo({
+    todo: todoDescription,
+    dueDate: dueDate,
+    completed: completed,
+  });
+
+  newTodo.save()
+    .then((todo) => {
+      res.send(todo);
+    })
+    .catch((err) => {
+      res.send(err);
+    })
 });
+  
+  
+  
+  
+//   const newTodo = createTodo(todoDescription, dueDate, completed);
+//   todosList.push(newTodo);
+//   console.log(newTodo);
+//   res.status(200).send(newTodo);
+// });
 
 // Update a todo
 todoRouter.put("/:id", (req, res) => {
@@ -150,6 +165,6 @@ todoRouter.delete("/:id", (req, res) => {
 });
 
 // populateWThreeTodos();
-deleteAllTodos();
+// deleteAllTodos();
 
 module.exports = todoRouter;
