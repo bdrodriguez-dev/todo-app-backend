@@ -5,84 +5,130 @@ const todoRouter = express.Router();
 
 // Helper Functions and data
 const { createTodo } = require("./helpers");
-const { todos } = require("./dummyTodos");
-let todosList = [...todos];
+// const { todos } = require("./dummyTodos");
+// let todosList = [...todos];
 
-/* ROUTES */
+// Mongoose
+const mongoose = require("mongoose");
+mongoose.connect(
+  "mongodb://localhost:27017/db?authSource=$admin --username superuser",
+  { useNewUrlParser: true, useUnifiedTopology: true }
+);
+
+// Setting up todoSchema and model
+const todoSchema = new mongoose.Schema({
+  todo: String,
+  dueDate: String,
+  completed: Boolean,
+});
+
+const Todo = mongoose.model("Todo", todoSchema);
+
+// const createTodoMongoose = (todo, dueDate, completed) => {
+//   const newTodo = new Todo({
+//     todo: todo,
+//     dueDate: dueDate,
+//     completed: completed,
+//   });
+
+//   newTodo.save(function (err) {
+//     if (err) return err;
+
+//     Todo.find({}).then((todos) => {
+//       console.log(todos);
+//     });
+//   });
+// };
+
+// const deleteAllTodos = () => {
+//   Todo.deleteMany({})
+//     .then(() => {
+//       console.log("Success. Todos deleted");
+//     })
+//     .catch((err) => {
+//       console.error(err);
+//     });
+// };
+
+// const getAllTodos = () => {
+//   Todo.find({}).then((todos) => {
+//     console.log(todos);
+//   });
+// };
+
+// const populateWThreeTodos = () => {
+//   createTodoMongoose("Go to the mall.", "21-08-21", false);
+//   createTodoMongoose("Take Gil to work", "21-07-16", false);
+//   createTodoMongoose("Feed the plants and water the cat", "21-08-21", true);
+//   Todo.find({}).then((todos) => console.log(todos));
+// };
+
+/* ------------------------------------- ROUTES ------------------------------------- */
 
 // Get all todos
-todoRouter.get("/", (req, res) => {
-  res.send(todosList);
+todoRouter.get("/", async (req, res) => {
+  try {
+    const todos = await Todo.find({});
+    res.status(200).send(todos);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 // Get todo by id
-todoRouter.get("/:id", (req, res) => {
+todoRouter.get("/:id", async (req, res) => {
   const todoId = req.params.id;
-  const todoIndex = todosList.findIndex((element) => {
-    return todoId === element.id;
-  });
-  if (todoIndex !== -1) {
-    res.status(200).send(todosList[todoIndex]);
-  } else {
-    res.send(404).send("No todo found with that ID.");
+
+  try {
+    const todo = await Todo.findById(todoId);
+    res.status(200).send(todo);
+  } catch (err) {
+    res.status(404).send(err);
   }
 });
 
 // Create a todo
-todoRouter.post("/", (req, res) => {
-  // If query invalid, use empty string instead
-  const todoDescription = req.query.todo;
-  const dueDate = req.query.dueDate;
-  const completed = req.query.completed;
+todoRouter.post("/", async (req, res) => {
+  const { todo, dueDate, completed } = req.query;
 
-  const newTodo = createTodo(todoDescription, dueDate, completed);
-  todosList.push(newTodo);
-  console.log(newTodo);
-  res.status(200).send(newTodo);
+  const newTodo = new Todo({
+    todo: todo,
+    dueDate: dueDate,
+    completed: completed,
+  });
+
+  try {
+    const todo = await newTodo.save();
+    res.status(201).send(todo);
+  } catch (err) {
+    res.status(400).send(err);
+  }
 });
 
 // Update a todo
-todoRouter.put("/:id", (req, res) => {
-  /*
-        req.query = {
-            todo: stuff,
-            dueDate: dateStuff,
-            completed: booleanStuff
-        }
-    */
+todoRouter.put("/:id", async (req, res) => {
   const todoId = req.params.id;
-  //get index
-  const todoIndex = todosList.findIndex((element) => {
-    return todoId === element.id;
-  });
-  //Check if index is found || -1
-  if (todoIndex !== -1) {
-    //get update from req.query
-    const update = { ...req.query, id: req.params.id };
-    //set update to array at that index
-    todosList[todoIndex] = update;
-    console.log(todosList[todoIndex]);
-    res.status(200).send(todosList[todoIndex]);
-  } else {
-    res.status(404).send("No todo found with that ID.");
+
+  try {
+    const todo = await Todo.findById(todoId);
+    Object.keys(req.query).forEach((key) => {
+      todo[key] = req.query[key];
+    });
+    const savedTodo = await todo.save();
+    res.status(200).send(savedTodo);
+  } catch (err) {
+    res.status(400).send(err);
   }
 });
 
 // Delete a todo
-todoRouter.delete("/:id", (req, res) => {
+todoRouter.delete("/:id", async (req, res) => {
   const todoId = req.params.id;
-  //get index
-  const todoIndex = todosList.findIndex((element) => {
-    return todoId === element.id;
-  });
-  //Check if index is found || -1
-  if (todoIndex !== -1) {
-    todoToBeDeleted = todosList[todoIndex];
-    todosList.splice(todoIndex, 1);
-    res.status(200).send(todoToBeDeleted);
-    console.log(todoToBeDeleted);
-  } else {
-    res.status(404).send("No todo found with that ID.");
+  try {
+    const deletedTodo = await Todo.findByIdAndDelete(todoId);
+    res.send(deletedTodo);
+  } catch (err) {
+    res.status(400).send(err);
   }
 });
 
