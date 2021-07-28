@@ -116,6 +116,7 @@ todoRouter.put("/:id", async (req, res) => {
     });
     const savedTodo = await todo.save();
     res.status(200).send(savedTodo);
+    console.log(savedTodo);
   } catch (err) {
     res.status(400).send(err);
   }
