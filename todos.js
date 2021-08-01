@@ -4,27 +4,16 @@ const express = require("express");
 const todoRouter = express.Router();
 
 // Helper Functions and data
-const { createTodo } = require("./helpers");
+// const { createTodo } = require("./helpers");
 // const { todos } = require("./dummyTodos");
 // let todosList = [...todos];
 
-// Mongoose
-const mongoose = require("mongoose");
-mongoose.connect(
-  "mongodb://localhost:27017/db?authSource=$admin --username superuser",
-  { useNewUrlParser: true, useUnifiedTopology: true }
-);
+// Mongoose models
+const { Todo, List } = require("./models/models");
 
-// Setting up todoSchema and model
-const todoSchema = new mongoose.Schema({
-  todo: String,
-  dueDate: String,
-  completed: Boolean,
-});
+/* ------------------------------------- HELPERS ------------------------------------- */
 
-const Todo = mongoose.model("Todo", todoSchema);
-
-// const createTodoMongoose = (todo, dueDate, completed) => {
+// const createTodo = (todo, dueDate, completed) => {
 //   const newTodo = new Todo({
 //     todo: todo,
 //     dueDate: dueDate,
@@ -89,20 +78,88 @@ todoRouter.get("/:id", async (req, res) => {
 
 // Create a todo
 todoRouter.post("/", async (req, res) => {
-  const { todo, dueDate, completed } = req.query;
+  // TODO: Update this to add todo to correct list
 
-  const newTodo = new Todo({
-    todo: todo,
-    dueDate: dueDate,
-    completed: completed,
-  });
+  const getList = async (listName) => {
+    try {
+      // check db to see if list by that name exists
+      const list = await List.find({ name: listName });
+      // if it does return it to assign it to the new todo
+      if (list) {
+        return list;
+      } else {
+        // if NOT, create a new list, save it, and return it so we can assign to the new todo
+
+        //create a new list
+        const tempList = new List({
+          name: listName,
+          list: [],
+        });
+
+        // save to db
+        const newList = await tempList.save();
+
+        return newList;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const { todo, dueDate, completed, listName } = req.query;
 
   try {
-    const todo = await newTodo.save();
-    res.status(201).send(todo);
-  } catch (err) {
+    // Create the new todo
+    const newTodo = await new Todo({
+      todo: todo,
+      dueDate: dueDate,
+      completed: completed,
+      list: getList(listName),
+    });
+
+    //save the newTodo
+    const dbSavedTodo = await newTodo.save();
+    // save the updatedList
+    const dbSavedList = await todoAssignedList.save();
+
+    const associatedList = dbSavedTodo.list;
+
+    // add it to its assign list
+    associatedList.list.push(newTodo);
+
+    res.status(201).json({
+      newTodo: dbSavedTodo,
+      updatedList: dbSavedList,
+    });
+  } catch (error) {
     res.status(400).send(err);
   }
+
+  // const newTodo = new Todo({
+  //   todo: todo,
+  //   dueDate: dueDate,
+  //   completed: completed,
+  //   list: list,
+  // });
+
+  // try {
+  //   const todo = await newTodo.save();
+  //   console.log(todo.list);
+
+  //   // Send todo to proper list
+  //   const list = await List.find({ name: todo.list });
+  //   console.log(list);
+
+  //   const listCopy = { ...list };
+  //   console.log(listCopy);
+
+  //   const updatedList = listCopy.save();
+  //   console.log(`updatedList: ${updatedList}`);
+
+  //   res.status(201).json({ updatedList });
+  // } catch (err) {
+  //   res.status(400).send(err);
+  // }
 });
 
 // Update a todo
@@ -130,6 +187,15 @@ todoRouter.delete("/:id", async (req, res) => {
     res.send(deletedTodo);
   } catch (err) {
     res.status(400).send(err);
+  }
+});
+
+todoRouter.delete("/", async (req, res) => {
+  try {
+    const deletedTodos = await Todo.deleteMany({});
+    res.json(deletedTodos);
+  } catch (error) {
+    res.send(error);
   }
 });
 
