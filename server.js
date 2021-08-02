@@ -1,8 +1,8 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const todoRouter = require("./todos");
-const listRouter = require("./lists");
+const todoRouter = require("./todos/todos");
+const listRouter = require("./lists/lists");
 
 // Use static server
 app.use(express.static("public"));

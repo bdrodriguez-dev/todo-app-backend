@@ -4,10 +4,10 @@ const express = require("express");
 const todoRouter = express.Router();
 
 // Helper Functions and data
-const dummyTodos = require("./dummyData");
+const dummyTodos = require("./dummy-todos");
 
 // Mongoose models
-const { Todo, List } = require("./models/models");
+const { Todo, List } = require("../models/models");
 
 /* ------------------------------------- ROUTES ------------------------------------- */
 
