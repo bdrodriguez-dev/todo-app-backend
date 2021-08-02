@@ -34,8 +34,15 @@ todoRouter.get("/:id", async (req, res) => {
 });
 
 // Get todos by list
-todoRouter.get("/:list", (req, res) => {
+todoRouter.get("/:list", async (req, res) => {
   // TODO:
+  const listName = req.params.list;
+  try {
+    const dbTodos = await Todo.find({ listName: listName });
+    res.status(200).send(dbTodos);
+  } catch (error) {
+    res.status(500).send(err);
+  }
 });
 
 // Create a todo

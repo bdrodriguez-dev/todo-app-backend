@@ -43,8 +43,6 @@ listRouter.post("/", async (req, res) => {
 
 // Fills db with dummy list data
 listRouter.post("/dummy", async (req, res) => {
-  // TODO: this
-
   // Helper function which creates a new Todo.todoItem and saves it into the db
   const processThroughDB = async (listName) => {
     const newList = new List({
