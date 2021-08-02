@@ -7,92 +7,92 @@ const { Todo, List } = require("./models/models");
 
 /* ------------------------------------- HELPERS ------------------------------------- */
 
-const populateWThree = async () => {
-  // Helpers
-  const createTodo = async (todo) => {
-    const todoItem = new Todo(todo);
-    const savedTodo = await todoItem.save();
-    console.log(savedTodo);
-  };
+// const populateWThree = async () => {
+//   // Helpers
+//   const createTodo = async (todo) => {
+//     const todoItem = new Todo(todo);
+//     const savedTodo = await todoItem.save();
+//     console.log(savedTodo);
+//   };
 
-  const createList = async (listObj) => {
-    const newList = new List({
-      name: listObj.name,
-      list: listObj.list,
-    });
-    const savedList = await newList.save();
-    return savedList;
-  };
+//   const createList = async (listObj) => {
+//     const newList = new List({
+//       name: listObj.name,
+//       list: listObj.list,
+//     });
+//     const savedList = await newList.save();
+//     return savedList;
+//   };
 
-  // Create Lists
-  [
-    {
-      name: "inbox",
-      list: [
-        {
-          todo: "Defeat neoliberalism",
-          dueDate: "25-01-07",
-          completed: false,
-          list: "inbox",
-        },
-        {
-          todo: "Become a robot",
-          dueDate: "32-07-07",
-          completed: false,
-          list: "inbox",
-        },
-        {
-          todo: "Create utopia",
-          dueDate: "50-01-07",
-          completed: false,
-          list: "inbox",
-        },
-      ].map((todo) => {
-        return new Todo({
-          todo: todo.todo,
-          dueDate: todo.dueDate,
-          completed: todo.completed,
-          list: todo.list,
-        });
-      }),
-    },
-    {
-      name: "home",
-      list: [
-        {
-          todo: "Water plants",
-          dueDate: "25-01-07",
-          completed: false,
-          list: "inbox",
-        },
-        {
-          todo: "Clean kitchen",
-          dueDate: "32-07-07",
-          completed: false,
-          list: "inbox",
-        },
-        {
-          todo: "Drink beer",
-          dueDate: "50-01-07",
-          completed: false,
-          list: "inbox",
-        },
-      ].map((todo) => {
-        return new Todo({
-          todo: todo.todo,
-          dueDate: todo.dueDate,
-          completed: todo.completed,
-          list: todo.list,
-        });
-      }),
-    },
-  ].forEach(async (list) => {
-    //trycatch
-    const tempList = createList(list);
-    console.log(await tempList);
-    return tempList;
-  });
-};
+// Create Lists
+//   [
+//     {
+//       name: "inbox",
+//       list: [
+//         {
+//           todo: "Defeat neoliberalism",
+//           dueDate: "25-01-07",
+//           completed: false,
+//           listName: "inbox",
+//         },
+//         {
+//           todo: "Become a robot",
+//           dueDate: "32-07-07",
+//           completed: false,
+//           listName: "inbox",
+//         },
+//         {
+//           todo: "Create utopia",
+//           dueDate: "50-01-07",
+//           completed: false,
+//           listName: "inbox",
+//         },
+//       ].map((todo) => {
+//         return new Todo({
+//           todo: todo.todo,
+//           dueDate: todo.dueDate,
+//           completed: todo.completed,
+//           listName: todo.list,
+//         });
+//       }),
+//     },
+//     {
+//       name: "home",
+//       list: [
+//         {
+//           todo: "Water plants",
+//           dueDate: "25-01-07",
+//           completed: false,
+//           listName: "inbox",
+//         },
+//         {
+//           todo: "Clean kitchen",
+//           dueDate: "32-07-07",
+//           completed: false,
+//           listName: "inbox",
+//         },
+//         {
+//           todo: "Drink beer",
+//           dueDate: "50-01-07",
+//           completed: false,
+//           listName: "inbox",
+//         },
+//       ].map((todo) => {
+//         return new Todo({
+//           todo: todo.todo,
+//           dueDate: todo.dueDate,
+//           completed: todo.completed,
+//           listName: todo.list,
+//         });
+//       }),
+//     },
+//   ].forEach(async (list) => {
+//     //trycatch
+//     const tempList = createList(list);
+//     console.log(await tempList);
+//     return tempList;
+//   });
+// };
 
 //populate with dummy lists
 // populateWThree();
@@ -120,7 +120,6 @@ listRouter.get("/:id", async (req, res) => {
 listRouter.post("/", async (req, res) => {
   const newList = new List({
     name: req.query.name,
-    list: [],
   });
 
   try {
@@ -129,6 +128,42 @@ listRouter.post("/", async (req, res) => {
   } catch (error) {
     res.send(error);
   }
+});
+
+// Fills db with dummy list data
+listRouter.post("/dummy", async (req, res) => {
+  // TODO: this
+
+  // Helper function which creates a new Todo.todoItem and saves it into the db
+  const processThroughDB = async (todo) => {
+    const newTodo = new Todo({
+      todo: todo.todo,
+      dueDate: todo.dueDate,
+      completed: todo.completed,
+      listName: todo.listName,
+    });
+    console.log(newTodo);
+    const savedTodo = await newTodo.save();
+    console.log(`Dummy todo saved! -> ${savedTodo}`);
+    return savedTodo;
+  };
+
+  // So we can res.json all at once afterwards
+  const savedTodosArr = [];
+
+  // For each dummyTodoObj, process it with processThroughDB (which creates a new Todo.todoItem and saves it into the db) then we res.send the savedTodo
+  dummyTodos.forEach(async (todoItem) => {
+    try {
+      const savedTodo = processThroughDB(todoItem);
+      savedTodosArr.push(todoItem);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  console.log(savedTodosArr);
+
+  res.json(savedTodosArr);
 });
 
 listRouter.put("/:id", async (req, res) => {

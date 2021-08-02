@@ -9,12 +9,11 @@ const todoSchema = new mongoose.Schema({
   todo: String,
   dueDate: String,
   completed: Boolean,
-  list: listSchema,
+  listName: String,
 });
 
 const listSchema = new mongoose.Schema({
   name: String,
-  list: [todoSchema],
 });
 
 module.exports = {

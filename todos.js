@@ -4,53 +4,10 @@ const express = require("express");
 const todoRouter = express.Router();
 
 // Helper Functions and data
-// const { createTodo } = require("./helpers");
-// const { todos } = require("./dummyTodos");
-// let todosList = [...todos];
+const dummyTodos = require("./dummyData");
 
 // Mongoose models
 const { Todo, List } = require("./models/models");
-
-/* ------------------------------------- HELPERS ------------------------------------- */
-
-// const createTodo = (todo, dueDate, completed) => {
-//   const newTodo = new Todo({
-//     todo: todo,
-//     dueDate: dueDate,
-//     completed: completed,
-//   });
-
-//   newTodo.save(function (err) {
-//     if (err) return err;
-
-//     Todo.find({}).then((todos) => {
-//       console.log(todos);
-//     });
-//   });
-// };
-
-// const deleteAllTodos = () => {
-//   Todo.deleteMany({})
-//     .then(() => {
-//       console.log("Success. Todos deleted");
-//     })
-//     .catch((err) => {
-//       console.error(err);
-//     });
-// };
-
-// const getAllTodos = () => {
-//   Todo.find({}).then((todos) => {
-//     console.log(todos);
-//   });
-// };
-
-// const populateWThreeTodos = () => {
-//   createTodoMongoose("Go to the mall.", "21-08-21", false);
-//   createTodoMongoose("Take Gil to work", "21-07-16", false);
-//   createTodoMongoose("Feed the plants and water the cat", "21-08-21", true);
-//   Todo.find({}).then((todos) => console.log(todos));
-// };
 
 /* ------------------------------------- ROUTES ------------------------------------- */
 
@@ -76,90 +33,64 @@ todoRouter.get("/:id", async (req, res) => {
   }
 });
 
+// Get todos by list
+todoRouter.get("/:list", (req, res) => {
+  // TODO:
+});
+
 // Create a todo
 todoRouter.post("/", async (req, res) => {
-  // TODO: Update this to add todo to correct list
-
-  const getList = async (listName) => {
-    try {
-      // check db to see if list by that name exists
-      const list = await List.find({ name: listName });
-      // if it does return it to assign it to the new todo
-      if (list) {
-        return list;
-      } else {
-        // if NOT, create a new list, save it, and return it so we can assign to the new todo
-
-        //create a new list
-        const tempList = new List({
-          name: listName,
-          list: [],
-        });
-
-        // save to db
-        const newList = await tempList.save();
-
-        return newList;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const { todo, dueDate, completed, listName } = req.query;
-
+  // console.log([todo, dueDate, completed, listName]);
   try {
     // Create the new todo
-    const newTodo = await new Todo({
+    const newTodo = new Todo({
       todo: todo,
       dueDate: dueDate,
       completed: completed,
-      list: getList(listName),
+      listName: listName,
     });
 
     //save the newTodo
     const dbSavedTodo = await newTodo.save();
-    // save the updatedList
-    const dbSavedList = await todoAssignedList.save();
-
-    const associatedList = dbSavedTodo.list;
-
-    // add it to its assign list
-    associatedList.list.push(newTodo);
-
-    res.status(201).json({
-      newTodo: dbSavedTodo,
-      updatedList: dbSavedList,
-    });
-  } catch (error) {
+    res.status(201).json(dbSavedTodo);
+  } catch (err) {
     res.status(400).send(err);
   }
+});
 
-  // const newTodo = new Todo({
-  //   todo: todo,
-  //   dueDate: dueDate,
-  //   completed: completed,
-  //   list: list,
-  // });
+// Seed dummy todos
+todoRouter.post("/dummy", async (req, res) => {
+  // Helper function which creates a new Todo.todoItem and saves it into the db
+  const processThroughDB = async (todo) => {
+    const newTodo = new Todo({
+      todo: todo.todo,
+      dueDate: todo.dueDate,
+      completed: todo.completed,
+      listName: todo.listName,
+    });
+    console.log(newTodo);
+    const savedTodo = await newTodo.save();
+    console.log(`Dummy todo saved! -> ${savedTodo}`);
+    return savedTodo;
+  };
 
-  // try {
-  //   const todo = await newTodo.save();
-  //   console.log(todo.list);
+  // So we can res.json all at once afterwards
+  const savedTodosArr = [];
 
-  //   // Send todo to proper list
-  //   const list = await List.find({ name: todo.list });
-  //   console.log(list);
+  // For each dummyTodoObj, process it with processThroughDB (which creates a new Todo.todoItem and saves it into the db) then we res.send the savedTodo
+  dummyTodos.forEach(async (todoItem) => {
+    try {
+      const savedTodo = processThroughDB(todoItem);
+      savedTodosArr.push(todoItem);
+    } catch (err) {
+      console.log(err);
+    }
+  });
 
-  //   const listCopy = { ...list };
-  //   console.log(listCopy);
+  console.log(savedTodosArr);
 
-  //   const updatedList = listCopy.save();
-  //   console.log(`updatedList: ${updatedList}`);
-
-  //   res.status(201).json({ updatedList });
-  // } catch (err) {
-  //   res.status(400).send(err);
-  // }
+  res.json(savedTodosArr);
 });
 
 // Update a todo
