@@ -1,2 +1,2 @@
-const dummyLists = ["inbox", "home", "work"];
+const dummyLists = ["inbox"];
 module.exports = dummyLists;

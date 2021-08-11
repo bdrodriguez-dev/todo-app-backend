@@ -36,9 +36,9 @@ todoRouter.get("/:id", async (req, res) => {
 // Get todos by list
 todoRouter.get("/:list", async (req, res) => {
   // TODO:
-  const listName = req.params.list;
+  const list = req.params.list;
   try {
-    const dbTodos = await Todo.find({ listName: listName });
+    const dbTodos = await Todo.find({ list: list });
     res.status(200).send(dbTodos);
   } catch (error) {
     res.status(500).send(err);
@@ -47,15 +47,15 @@ todoRouter.get("/:list", async (req, res) => {
 
 // Create a todo
 todoRouter.post("/", async (req, res) => {
-  const { todo, dueDate, completed, listName } = req.query;
-  // console.log([todo, dueDate, completed, listName]);
+  const { todo, dueDate, completed, list } = req.query;
+  // console.log([todo, dueDate, completed, list]);
   try {
     // Create the new todo
     const newTodo = new Todo({
       todo: todo,
       dueDate: dueDate,
       completed: completed,
-      listName: listName,
+      list: list,
     });
 
     //save the newTodo
@@ -74,7 +74,7 @@ todoRouter.post("/dummy", async (req, res) => {
       todo: todo.todo,
       dueDate: todo.dueDate,
       completed: todo.completed,
-      listName: todo.listName,
+      list: todo.list,
     });
     console.log(newTodo);
     const savedTodo = await newTodo.save();
