@@ -14,6 +14,12 @@ const dummyTodos = [
     completed: false,
     list: "inbox",
   },
+  {
+    todo: "Water the plants",
+    dueDate: "2021-08-11",
+    completed: true,
+    list: "inbox",
+  },
 ];
 // const dummyTodos = [
 //   {
