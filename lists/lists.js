@@ -42,29 +42,29 @@ listRouter.post("/", async (req, res) => {
 });
 
 // Fills db with dummy list data
-listRouter.post("/dummy", async (req, res) => {
-  // Helper function which creates a new Todo.todoItem and saves it into the db
-  const processThroughDB = async (listName) => {
-    const newList = new List({
-      name: listName,
-    });
-    console.log(newList);
-    const savedList = await newList.save();
-    console.log(`Dummy list saved! -> ${savedList}`);
-    return savedList;
-  };
-
-  // For each dummyTodoObj, process it with processThroughDB (which creates a new Todo.todoItem and saves it into the db) then we res.send the savedTodo
-  dummyLists.forEach(async (listName) => {
-    try {
-      processThroughDB(listName);
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
-  res.send("Dummy lists created...");
-});
+// listRouter.post("/dummy", async (req, res) => {
+//   // Helper function which creates a new Todo.todoItem and saves it into the db
+//   const processThroughDB = async (listName) => {
+//     const newList = new List({
+//       name: listName,
+//     });
+//     console.log(newList);
+//     const savedList = await newList.save();
+//     console.log(`Dummy list saved! -> ${savedList}`);
+//     return savedList;
+//   };
+//
+//   // For each dummyTodoObj, process it with processThroughDB (which creates a new Todo.todoItem and saves it into the db) then we res.send the savedTodo
+//   dummyLists.forEach(async (listName) => {
+//     try {
+//       processThroughDB(listName);
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   });
+//
+//   res.send("Dummy lists created...");
+// });
 
 listRouter.put("/:id", async (req, res) => {
   try {
@@ -80,10 +80,10 @@ listRouter.put("/:id", async (req, res) => {
 listRouter.delete("/:id", async (req, res) => {
   try {
     // get list that will be deleted
-    const listToDelete = await findById(req.params.id);
+    const listToDelete = await List.findById(req.params.id);
     // get todos attached to that list
-    const todosToDelete = await Todo.find({ list: listToDelete.name });
-    console.log(todosToDelete);
+    // const todosToDelete = await Todo.find({ list: listToDelete.name });
+    // console.log(todosToDelete);
     // delete list from List collection
     const deletedList = await List.findByIdAndDelete(req.params.id);
     // delete todos from Todo collection

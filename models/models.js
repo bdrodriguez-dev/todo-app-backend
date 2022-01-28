@@ -9,7 +9,7 @@ const todoSchema = new mongoose.Schema({
   todo: String,
   dueDate: String,
   completed: Boolean,
-  list: String,
+  list: { type: String, default: "inbox" },
 });
 
 const listSchema = new mongoose.Schema({

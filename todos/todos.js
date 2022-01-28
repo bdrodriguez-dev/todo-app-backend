@@ -7,7 +7,7 @@ const todoRouter = express.Router();
 const dummyTodos = require("./dummy-todos");
 
 // Mongoose models
-const { Todo, List } = require("../models/models");
+const { Todo } = require("../models/models");
 
 /* ------------------------------------- ROUTES ------------------------------------- */
 
@@ -50,24 +50,31 @@ todoRouter.post("/", async (req, res) => {
   const { todo, dueDate, completed, list } = req.query;
   // console.log([todo, dueDate, completed, list]);
   try {
+    const defaultList = 'inbox';
+    let actualList = list;
+    if (actualList === 'undefined') {
+      actualList = defaultList;
+    }
     // Create the new todo
     const newTodo = new Todo({
       todo: todo,
       dueDate: dueDate,
       completed: completed,
-      list: list,
+      list: actualList,
     });
 
     //save the newTodo
     const dbSavedTodo = await newTodo.save();
+    console.log(dbSavedTodo);
     res.status(201).json(dbSavedTodo);
   } catch (err) {
     res.status(400).send(err);
+    console.log(err);
   }
 });
 
 // Seed dummy todos
-todoRouter.post("/dummy", async (req, res) => {
+todoRouter.get("/dummy", async (req, res) => {
   // Helper function which creates a new Todo.todoItem and saves it into the db
   const processThroughDB = async (todo) => {
     const newTodo = new Todo({
@@ -128,6 +135,7 @@ todoRouter.delete("/:id", async (req, res) => {
   }
 });
 
+// Delete all todos
 todoRouter.delete("/", async (req, res) => {
   try {
     const deletedTodos = await Todo.deleteMany({});
