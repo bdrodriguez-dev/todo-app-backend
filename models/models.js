@@ -8,12 +8,13 @@ mongoose.connect(
 const todoSchema = new mongoose.Schema({
   todo: String,
   dueDate: String,
-  completed: Boolean,
+  completed: { type: Boolean, default: false},
   list: { type: String, default: "inbox" },
 });
 
 const listSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, unique: true },
+  color: String,
 });
 
 module.exports = {

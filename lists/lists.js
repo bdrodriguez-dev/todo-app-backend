@@ -31,11 +31,12 @@ listRouter.get("/:id", async (req, res) => {
 listRouter.post("/", async (req, res) => {
   const newList = new List({
     name: req.query.name,
+    color: req.query.color,
   });
 
   try {
     const list = await newList.save();
-    res.json(list);
+    res.send(list);
   } catch (error) {
     res.send(error);
   }
@@ -70,6 +71,7 @@ listRouter.put("/:id", async (req, res) => {
   try {
     const list = await List.findById(req.params.id);
     list.name = req.query.name;
+    list.color = req.query.color;
     const updatedList = await list.save();
     res.json(updatedList);
   } catch (error) {

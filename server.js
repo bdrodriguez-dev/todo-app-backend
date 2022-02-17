@@ -3,8 +3,7 @@ const app = express();
 const cors = require("cors");
 const todoRouter = require("./todos/todos");
 const listRouter = require("./lists/lists");
-// const dummyTodos = require("./dummy-todos");
-// const dummyLists = require("./dummy-lists");
+const { List } = require("./models/models");
 
 // Use static server
 app.use(express.static("public"));
@@ -15,6 +14,25 @@ app.use(cors());
 // Load todoRouter for todo related routes
 app.use("/todos", todoRouter);
 app.use("/lists", listRouter);
+
+const setDefaultList = async () => {
+  const defaultList = new List({ name: "inbox", color: "#B8B8B8" });
+  try {
+    const inbox = await List.find({ name: "inbox" });
+    if (!inbox.length) {
+      console.log(`inbox: ${inbox}`);
+      const savedList = await defaultList.save();
+      console.log(`savedList: ${savedList}`);
+    } else {
+      console.log(`if statement failed`);
+      // console.log(JSON.stringify(inbox));
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+setDefaultList();
 
 // // Load dummy todos
 // const processThroughDBTodo = async (todo) => {
@@ -33,14 +51,9 @@ app.use("/lists", listRouter);
 // // So we can res.json all at once afterwards
 // const savedTodosArr = [];
 
-// // For each dummyTodoObj, process it with processThroughDB (which creates a new Todo.todoItem and saves it into the db) then we res.send the savedTodo
-// dummyTodos.forEach(async (todoItem) => {
-//   try {
-//     processThroughDBTodo(todoItem);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// });
+// // For each dummyTodoObj, process it with processThroughDB (which creates a new Todo.todoItem and saves it into the
+// db) then we res.send the savedTodo dummyTodos.forEach(async (todoItem) => { try { processThroughDBTodo(todoItem); }
+// catch (err) { console.log(err); } });
 
 // // Load dummy lists
 // const processThroughDBList = async (listName) => {
@@ -53,14 +66,9 @@ app.use("/lists", listRouter);
 //   return savedList;
 // };
 
-// // For each dummyTodoObj, process it with processThroughDB (which creates a new Todo.todoItem and saves it into the db) then we res.send the savedTodo
-// dummyLists.forEach(async (listName) => {
-//   try {
-//     processThroughDBList(listName);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// });
+// // For each dummyTodoObj, process it with processThroughDB (which creates a new Todo.todoItem and saves it into the
+// db) then we res.send the savedTodo dummyLists.forEach(async (listName) => { try { processThroughDBList(listName); }
+// catch (err) { console.log(err); } });
 
 const PORT = 8000;
 
